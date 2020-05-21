@@ -14,4 +14,6 @@ public class UserDto {
     private String userMobile;
     private String userEmail;
     private String userNewPassword;
+    private Integer userSex;
+    private String userSignature;
 }

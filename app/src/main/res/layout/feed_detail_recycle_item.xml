@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/feed_card"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#ffffff"
-    android:descendantFocusability="blocksDescendants"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <include layout="@layout/feed_info_include"/>
+    <data>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    </data>
+
+    <LinearLayout
+        android:id="@+id/feed_card"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="@dimen/spacing_16"
-        android:paddingRight="@dimen/spacing_16"
-        android:overScrollMode="never"
-        android:scrollbars="none"/>
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="vertical">
 
-    <include layout="@layout/feed_action_include"/>
+        <include
+            android:id="@+id/feed_info_layout"
+            layout="@layout/feed_info_include" />
 
-    <include layout="@layout/feed_like_include"/>
+        <ImageView
+            android:id="@+id/feed_img"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true" />
 
-</LinearLayout>
+        <include layout="@layout/feed_action_include" />
+
+        <include layout="@layout/feed_like_include" />
+
+    </LinearLayout>
+</layout>

@@ -50,7 +50,6 @@
 
     <!-- Nav String -->
     <string name="nav_home">首页</string>
-    <string name="nav_camera">圈子</string>
     <string name="nav_message">消息</string>
     <string name="nav_mine">我的</string>
 

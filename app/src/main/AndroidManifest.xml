@@ -48,6 +48,7 @@
             android:name=".module.main.MainActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".module.user.ui.PersonalInfoActivity"></activity>
+        <activity android:name=".module.feed.ui.PublishActivity"></activity>
 
         <!-- PhotoPicker start -->
         <activity

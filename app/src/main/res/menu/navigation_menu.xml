@@ -7,9 +7,9 @@
         android:title="@string/nav_home"/>
 
     <item
-        android:id="@+id/navigation_camera"
-        android:icon="@drawable/ic_camera_selector"
-        android:title="@string/nav_camera"/>
+        android:id="@+id/navigation_message"
+        android:icon="@drawable/ic_message_selector"
+        android:title="@string/nav_message"/>
 
     <item
         android:id="@+id/navigation_mine"

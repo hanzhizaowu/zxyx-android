@@ -192,6 +192,7 @@ public class PersonalInfoActivity extends BaseActivity implements Presenter {
                         return;
                     }
                     if(!TextUtils.isEmpty(userDto.getUserAvatar())) {
+                        showUserUpdateSuccess();
                         ContentUtil.loadUserAvatar(activityPersonalInfoBinding.personImg, userDto.getUserAvatar());
                         file.delete();
                     }

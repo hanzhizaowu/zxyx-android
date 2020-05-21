@@ -1,10 +1,5 @@
 package cn.zhaoxi.zxyx.common.api;
 
-import android.media.MediaDrm;
-
-import java.io.File;
-import java.util.List;
-
 import cn.zhaoxi.zxyx.common.result.RetrofitResponse;
 import cn.zhaoxi.zxyx.common.result.RetrofitResponseData;
 import cn.zhaoxi.zxyx.data.dto.UserDto;
@@ -61,11 +56,10 @@ public interface UserApis {
     /**
      * 用户头像上传
      * @param file     用户头像文件
-     * @param userId     用户id
      */
     @Multipart
     @POST("rss/upload/user/image")
-    Observable<RetrofitResponseData<UserDto>> uploadUserImage(@Part MultipartBody.Part file, @Query("userId") Long userId);
+    Observable<RetrofitResponseData<UserDto>> uploadUserImage(@Part MultipartBody.Part file);
 
     /**
      * 用户信息更改

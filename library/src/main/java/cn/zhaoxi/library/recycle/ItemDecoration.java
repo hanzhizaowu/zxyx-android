@@ -17,8 +17,8 @@ import android.widget.LinearLayout;
  */
 public class ItemDecoration extends RecyclerView.ItemDecoration {
 
-    public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
-    public static final int VERTICAL = LinearLayout.VERTICAL;
+    private final int HORIZONTAL = LinearLayoutCompat.HORIZONTAL;
+    private final int VERTICAL = LinearLayoutCompat.VERTICAL;
 
     private int mOrientation;
     private int mDecoration;

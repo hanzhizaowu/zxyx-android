@@ -1,10 +1,13 @@
 package cn.zhaoxi.zxyx.module.main;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,9 +20,6 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import cn.zhaoxi.library.base.BaseFragment;
 import cn.zhaoxi.library.loadmore.LoadMord;
 import cn.zhaoxi.library.loadmore.OnLoadMoreListener;
@@ -30,11 +30,15 @@ import cn.zhaoxi.library.util.ToolbarUtil;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.adapter.FeedAdapter;
 import cn.zhaoxi.zxyx.common.config.Constants;
-import cn.zhaoxi.zxyx.common.okhttp.OkUtil;
+import cn.zhaoxi.zxyx.common.config.ExceptionMsg;
+import cn.zhaoxi.zxyx.common.result.RetrofitResponseData;
 import cn.zhaoxi.zxyx.common.util.SPUtil;
-import cn.zhaoxi.zxyx.data.entity.User;
+import cn.zhaoxi.zxyx.data.dto.FeedDto;
+import cn.zhaoxi.zxyx.data.dto.UserDto;
+import cn.zhaoxi.zxyx.databinding.FragmentFeedBinding;
 import cn.zhaoxi.zxyx.entity.Feed;
-import cn.zhaoxi.zxyx.entity.Like;
+import cn.zhaoxi.zxyx.module.feed.ui.PublishActivity;
+import cn.zhaoxi.zxyx.module.feed.viewmodel.FeedViewModel;
 
 /**
  * 圈子动态
@@ -43,20 +47,13 @@ public class FeedFragment extends BaseFragment {
 
     private static final String FEED_TYPE = "feed_type";
 
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
-    @BindView(R.id.swipe_refresh_layout)
-    SwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private FragmentFeedBinding fragmentFeedBinding;
 
-    private String saveUid;
-    private String saveUName;
-
-    private List<Feed> mList = new ArrayList<>();
+    private List<FeedDto> mList = new ArrayList<>();
     private FeedAdapter mAdapter;
 
-    private int mPage = 1;
     private int mCount = 10;
     private final int MOD_REFRESH = 1;
     private final int MOD_LOADING = 2;
@@ -66,33 +63,24 @@ public class FeedFragment extends BaseFragment {
 
     }
 
-    public static FeedFragment newInstance(String feedType) {
-        FeedFragment fragment = new FeedFragment();
-        Bundle args = new Bundle();
-        args.putString(FEED_TYPE, feedType);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            String mType = getArguments().getString(FEED_TYPE);
-        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_feed, container, false);
-        ButterKnife.bind(this, view);
+        fragmentFeedBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_feed, container,false);
+        View view = fragmentFeedBinding.getRoot();
+        mRecyclerView = fragmentFeedBinding.recyclerView;
+        mSwipeRefreshLayout = fragmentFeedBinding.swipeRefreshLayout;
         init();
         return view;
     }
 
     private void init() {
-        ToolbarUtil.init(mToolbar, getActivity())
-                .setTitle(R.string.nav_camera)
+        ToolbarUtil.init(fragmentFeedBinding.feedToolbar, getActivity())
+                .setTitle(R.string.nav_home)
                 .setTitleCenter()
                 .setMenu(R.menu.publish_menu, new Toolbar.OnMenuItemClickListener() {
                     @Override
@@ -107,22 +95,20 @@ public class FeedFragment extends BaseFragment {
                 })
                 .build();
 
-        saveUid = SPUtil.build().getString(Constants.SP_USER_ID);
-        saveUName = SPUtil.build().getString(Constants.SP_USER_NAME);
-
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
+
         mRecyclerView.setItemAnimator(new ItemAnimator());
-        @SuppressLint("WrongConstant") ItemDecoration itemDecoration = new ItemDecoration(ItemDecoration.VERTICAL, 10, Color.parseColor("#f2f2f2"));
+        ItemDecoration itemDecoration = new ItemDecoration(LinearLayoutCompat.VERTICAL, 10, Color.parseColor("#f2f2f2"));
         // 隐藏最后一个item的分割线
         itemDecoration.setGoneLast(true);
         mRecyclerView.addItemDecoration(itemDecoration);
+
         mAdapter = new FeedAdapter(mList);
         mRecyclerView.setAdapter(mAdapter);
 
         initEvent();
-
-        getMoodList(mPage, mCount);
+        getMoodList(mCount);
     }
 
     //初始化事件
@@ -132,18 +118,17 @@ public class FeedFragment extends BaseFragment {
             @Override
             public void onRefresh() {
                 RefreshMODE = MOD_REFRESH;
-                mPage = 1;
-                getMoodList(mPage, mCount);
+                getMoodList(mCount);
             }
         });
 
         //item点击
         mAdapter.setOnItemListener(new FeedAdapter.OnItemListener() {
             @Override
-            public void onItemClick(View view, Feed feed, int position) {
+            public void onItemClick(View view, FeedDto feed, int position) {
                 switch (view.getId()) {
                     case R.id.user_img:
-                        goToUser(feed.getUser());
+                        goToUser(feed.getPostUser());
                         break;
                     case R.id.feed_card:
                     //case R.id.feed_comment_layout:
@@ -171,7 +156,7 @@ public class FeedFragment extends BaseFragment {
 
             @Override
             public void onLoadMore() {
-                if (mAdapter.getItemCount() < 4) return;
+                if (mAdapter.getItemCount() < mCount) return;
 
                 RefreshMODE = MOD_LOADING;
                 mAdapter.updateLoadStatus(LoadMord.LOAD_MORE);
@@ -179,7 +164,7 @@ public class FeedFragment extends BaseFragment {
                 mRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        getMoodList(mPage, mCount);
+                        getMoodList(mCount);
                     }
                 },1000);
             }
@@ -188,12 +173,12 @@ public class FeedFragment extends BaseFragment {
 
     // 前往动态发布
     private void gotoPublish() {
-//        Intent intent = new Intent(getActivity(), PublishActivity.class);
-//        startActivityForResult(intent, Constants.ACTIVITY_PUBLISH);
+        Intent intent = new Intent(getActivity(), PublishActivity.class);
+        startActivityForResult(intent, Constants.ACTIVITY_PUBLISH);
     }
 
     // 前往动态详情
-    private void gotoMood(Feed feed) {
+    private void gotoMood(FeedDto feed) {
        /* Intent intent = new Intent(getActivity(), FeedActivity.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("feed", feed);
@@ -234,66 +219,57 @@ public class FeedFragment extends BaseFragment {
     }
 
     // 获取动态列表
-    private void getMoodList(int pageNum, int pageSize) {
+    private void getMoodList(int pageSize) {
         if (!mSwipeRefreshLayout.isRefreshing() && RefreshMODE == MOD_REFRESH) mSwipeRefreshLayout.setRefreshing(true);
-        String uid = SPUtil.build().getString(Constants.SP_USER_ID);
-        /*OkUtil.post()
-                .url(Api.pageFeed)
-                .addParam("userId", uid)
-                .addParam("pageNum", pageNum)
-                .addParam("pageSize", pageSize)
-                .execute(new ResultCallback<Result<PageInfo<Feed>>>() {
-                    @Override
-                    public void onSuccess(Result<PageInfo<Feed>> response) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        String code = response.getCode();
-                        if (!"00000".equals(code)) {
-                            mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
-                            showToast(R.string.toast_get_feed_error);
-                            return;
-                        }
-                        PageInfo<Feed> page = response.getData();
-                        Integer size = page.getSize();
-                        if (size == 0) {
-                            mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
-                            return;
-                        }
-                        mPage++;
-                        List<Feed> list = page.getList();
-                        switch (RefreshMODE) {
-                            case MOD_LOADING:
-                                updateData(list);
-                                break;
-                            default:
-                                setData(list);
-                                break;
-                        }
-                    }
+        Long uid = SPUtil.build().getLong(Constants.SP_USER_ID);
+        Long feedId = SPUtil.build().getLong(Constants.SP_FEED_ID);
+        if (feedId < 0) {
+            feedId = 0L;
+        }
 
-                    @Override
-                    public void onError(Call call, Exception e) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
-                        showToast(R.string.toast_get_feed_error);
-                    }
-                });*/
+        FeedViewModel feedViewModel = ViewModelProviders.of(this).get(FeedViewModel.class);
+        feedViewModel.getFeedPage(uid, feedId).observe(this, new Observer<RetrofitResponseData<List<FeedDto>>>() {
+            @Override
+            public void onChanged(RetrofitResponseData<List<FeedDto>> response) {
+                mSwipeRefreshLayout.setRefreshing(false);
+                Integer code = response.getCode();
+                if (!ExceptionMsg.SUCCESS.getCode().equals(code)) {
+                    mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
+                    showToast(R.string.toast_get_feed_error);
+                    return;
+                }
+
+                List<FeedDto> pageFeed = response.getData();
+                if ((pageFeed == null) || (pageFeed.size() == 0)) {
+                    mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
+                    return;
+                }
+                switch (RefreshMODE) {
+                    case MOD_LOADING:
+                        updateData(pageFeed);
+                        break;
+                    default:
+                        setData(pageFeed);
+                        break;
+                }
+            }
+        });
     }
 
     // 设置数据
-    private void setData(List<Feed> data){
+    private void setData(List<FeedDto> data){
         mAdapter.setData(data);
     }
 
     // 更新数据
-    public void updateData(List<Feed> data) {
+    public void updateData(List<FeedDto> data) {
         mAdapter.addData(data);
     }
 
     // 刷新数据
     private void onRefresh(){
         RefreshMODE = MOD_REFRESH;
-        mPage = 1;
-        getMoodList(mPage, mCount);
+        getMoodList(mCount);
     }
 
     @Override
@@ -308,7 +284,7 @@ public class FeedFragment extends BaseFragment {
     /**
      * 前往用户页面
      */
-    private void goToUser(User user){
+    private void goToUser(UserDto user){
         /*Intent intent = new Intent(getActivity(), UserActivity.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constants.PASSED_USER_INFO, user);

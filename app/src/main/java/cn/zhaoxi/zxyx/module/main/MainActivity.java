@@ -23,7 +23,6 @@ import cn.zhaoxi.zxyx.databinding.ActivityMainBinding;
 public class MainActivity extends BaseActivity {
 
     private FragmentManager mFragmentManager;
-    private HomeFragment mHomeFragment;
     private FeedFragment mFeedFragment;
     private MineFragment mMineFragment;
     private ActivityMainBinding activityMainBinding;
@@ -45,11 +44,10 @@ public class MainActivity extends BaseActivity {
 
     private void initFragment() {
         mFragmentManager = getSupportFragmentManager();
-        mHomeFragment = HomeFragment.newInstance("home");
-        mFeedFragment = FeedFragment.newInstance("feed");
+        mFeedFragment = new FeedFragment();
         mMineFragment = new MineFragment();
-        activityMainBinding.bottomNavigation.setSelectedItemId(R.id.navigation_mine);
-        switchFragment(mMineFragment);
+        activityMainBinding.bottomNavigation.setSelectedItemId(R.id.navigation_home);
+        switchFragment(mFeedFragment);
     }
 
     //底部导航
@@ -59,9 +57,6 @@ public class MainActivity extends BaseActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.navigation_home:
-                        switchFragment(mHomeFragment);
-                        return true;
-                    case R.id.navigation_camera:
                         switchFragment(mFeedFragment);
                         return true;
                     case R.id.navigation_mine:

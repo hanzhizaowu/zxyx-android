@@ -14,19 +14,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.common.util.ContentUtil;
-import cn.zhaoxi.zxyx.data.dto.PhotoDto;
 
-/**
- * author : Bafs
- * e-mail : bafs.jy@live.com
- * time   : 2017/11/03
- * desc   : 动态图片
- * version: 1.0
- */
-public class FeedPhotoAdapter extends RecyclerView.Adapter<FeedPhotoAdapter.PhotoViewHolder> {
+public class PhotoSelAdapter extends RecyclerView.Adapter<PhotoSelAdapter.PhotoViewHolder> {
 
-    private int mType = 0;
-    private List<PhotoDto> mPhotos;
+    public static final String mPhotoAdd = "file:///android_asset/icon_photo_add.png";
+    private List<String> mPhotos;
 
     private OnItemClickListener mOnItemClickListener;
 
@@ -36,10 +28,12 @@ public class FeedPhotoAdapter extends RecyclerView.Adapter<FeedPhotoAdapter.Phot
 
     public interface OnItemClickListener{
         void onPhotoClick(int position);
+        void onDelete(int position);
     }
 
-    public FeedPhotoAdapter(List<PhotoDto> photos) {
+    public PhotoSelAdapter(List<String> photos) {
         this.mPhotos = photos;
+        if (mPhotos.size() < 6 && !mPhotos.contains(mPhotoAdd)) mPhotos.add(mPhotoAdd);
     }
 
     @NonNull
@@ -59,8 +53,9 @@ public class FeedPhotoAdapter extends RecyclerView.Adapter<FeedPhotoAdapter.Phot
         return mPhotos.size();
     }
 
-    public void setPhotos(List<PhotoDto> photos) {
+    public void setPhotos(List<String> photos) {
         this.mPhotos = photos;
+        if (mPhotos.size() < 6 && !mPhotos.contains(mPhotoAdd)) mPhotos.add(mPhotoAdd);
         notifyDataSetChanged();
     }
 
@@ -77,18 +72,25 @@ public class FeedPhotoAdapter extends RecyclerView.Adapter<FeedPhotoAdapter.Phot
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindItem(PhotoDto photo, final int position) {
+        public void bindItem(String photoUrl, final int position) {
             mPosition = position;
-            mIvDelete.setVisibility(View.GONE);
-            // 加载图片
-            ContentUtil.loadFeedImage(mIvPhoto , photo.getUrl());
+            if (mPhotos.get(position).equals(mPhotoAdd)) {
+                mIvDelete.setVisibility(View.GONE);
+            } else {
+                mIvDelete.setVisibility(View.VISIBLE);
+            }
+
+            ContentUtil.loadImage(mIvPhoto , photoUrl);
         }
 
-        @OnClick({R.id.iv_photo})
+        @OnClick({R.id.iv_photo, R.id.iv_delete})
         public void onClick(View view){
             switch (view.getId()) {
                 case R.id.iv_photo:
                     if (mOnItemClickListener != null) mOnItemClickListener.onPhotoClick(mPosition);
+                    break;
+                case R.id.iv_delete:
+                    if (mOnItemClickListener != null) mOnItemClickListener.onDelete(mPosition);
                     break;
             }
         }

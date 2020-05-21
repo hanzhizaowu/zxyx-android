@@ -75,7 +75,7 @@ public class MineRespository {
         }
         RequestBody requestFile = RequestBody.create(MediaType.parse(fileName), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-        Observable<RetrofitResponseData<UserDto>> observable = userApis.uploadUserImage(body, userId);
+        Observable<RetrofitResponseData<UserDto>> observable = userApis.uploadUserImage(body);
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<RetrofitResponseData<UserDto>>() {

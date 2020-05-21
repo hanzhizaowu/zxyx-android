@@ -1,37 +1,36 @@
 package cn.zhaoxi.zxyx.adapter;
 
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.zhaoxi.library.BuildConfig;
 import cn.zhaoxi.library.loadmore.LoadMord;
 import cn.zhaoxi.library.loadmore.LoadMoreViewHolder;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.common.util.ContentUtil;
 import cn.zhaoxi.zxyx.common.util.DateUtil;
 import cn.zhaoxi.zxyx.common.util.FeedContentUtil;
-import cn.zhaoxi.zxyx.data.entity.User;
-import cn.zhaoxi.zxyx.entity.Feed;
+import cn.zhaoxi.zxyx.data.dto.FeedDto;
+import cn.zhaoxi.zxyx.data.dto.PhotoDto;
+import cn.zhaoxi.zxyx.data.dto.UserDto;
+import cn.zhaoxi.zxyx.databinding.FeedDetailRecycleItemBinding;
 
 /**
  * Feed Adapter
  */
 public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Feed> mList;
+    private List<FeedDto> mList;
 
     private LoadMoreViewHolder mLoadMoreViewHolder;
 
@@ -40,7 +39,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private OnItemListener mOnItemListener;
 
     public interface OnItemListener {
-        void onItemClick(View view, Feed feed, int position);
+        void onItemClick(View view, FeedDto feed, int position);
         void onPhotoClick(ArrayList<String> photos, int position);
     }
 
@@ -48,8 +47,8 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.mOnItemListener = onItemListener;
     }
 
-    public FeedAdapter(List<Feed> list) {
-        this.mList = list == null ? new ArrayList<Feed>() : list;
+    public FeedAdapter(List<FeedDto> list) {
+        this.mList = list == null ? new ArrayList<FeedDto>() : list;
     }
 
     @Override
@@ -69,8 +68,9 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             View loadView = View.inflate(parent.getContext(), R.layout.lib_load_more, null);
             return mLoadMoreViewHolder = new LoadMoreViewHolder(loadView);
         } else {
-            View feedView = View.inflate(parent.getContext(), R.layout.feed_detail_recycle_item, null);
-            return new MoodViewHolder(feedView);
+            FeedDetailRecycleItemBinding feedDetailRecycleItemBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.feed_detail_recycle_item, parent, false);
+
+            return new MoodViewHolder(feedDetailRecycleItemBinding);
         }
     }
 
@@ -78,7 +78,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof LoadMoreViewHolder) {
             LoadMoreViewHolder loadMoreViewHolder = (LoadMoreViewHolder) holder;
-            if (getItemCount() > 5) {
+            if (getItemCount() >= 10) {
                 loadMoreViewHolder.bindItem(LoadMord.LOAD_PULL_TO);
             } else {
                 loadMoreViewHolder.bindItem(LoadMord.LOAD_END);
@@ -99,7 +99,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 设置数据
-    public void setData(List<Feed> data) {
+    public void setData(List<FeedDto> data) {
         if (data == null) {
             return;
         }
@@ -109,7 +109,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 添加数据
-    public void addData(List<Feed> data) {
+    public void addData(List<FeedDto> data) {
         if (data == null) {
             return;
         }
@@ -119,89 +119,53 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 更新item
-    public void updateItem(Feed feed, int position) {
+    public void updateItem(FeedDto feed, int position) {
         mList.set(position, feed);
         notifyItemChanged(position);
     }
 
     class MoodViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.user_img)
-        ImageView mUserImg;
-        @BindView(R.id.user_name)
-        TextView mUserName;
-        @BindView(R.id.feed_time)
-        TextView mFeedTime;
-        @BindView(R.id.feed_info)
-        AppCompatTextView mFeedInfo;
-        @BindView(R.id.feed_body)
-        LinearLayout mFeedBody;
-        @BindView(R.id.feed_view_num)
-        TextView mFeedSeeNum;
-        @BindView(R.id.feed_comment_num)
-        TextView mFeedCommentNum;
-        @BindView(R.id.feed_comment_layout)
-        LinearLayout mFeedCommentLayout;
-        @BindView(R.id.feed_like_icon)
-        ImageView mFeedLikeIcon;
-        @BindView(R.id.feed_like_num)
-        TextView mFeedLikeNum;
-        @BindView(R.id.feed_like_layout)
-        LinearLayout mFeedLikeLayout;
-        @BindView(R.id.feed_action_layout)
-        LinearLayout mFeedActionLayout;
-        @BindView(R.id.like_people)
-        TextView mLikePeople;
-        @BindView(R.id.like_window)
-        LinearLayout mLikeWindow;
-        @BindView(R.id.feed_card)
-        LinearLayout mFeedCard;
-        @BindView(R.id.recycler_view)
-        RecyclerView mRecyclerView;
-
-        private Feed mFeed;
+        private FeedDto mFeed;
         private int mPosition;
+        private FeedDetailRecycleItemBinding feedDetailRecycleItemBinding;
 
-        public MoodViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
+        public MoodViewHolder(FeedDetailRecycleItemBinding feedBinding) {
+            super(feedBinding.getRoot());
+            feedDetailRecycleItemBinding = feedBinding;
         }
 
-        public void bindItem(Feed feed, int position) {
+        public void bindItem(FeedDto feed, int position) {
             mFeed = feed;
             mPosition = position;
-            User user = feed.getUser();
-            user = user == null ? new User() : user;
+            UserDto user = feed.getPostUser();
+            user = user == null ? new UserDto() : user;
             // 动态详情
-            ContentUtil.loadUserAvatar(mUserImg, user.getUserAvatar());
+            ContentUtil.loadUserAvatar(feedDetailRecycleItemBinding.feedInfoLayout.userImg, user.getUserAvatar());
 
-            mUserName.setText(user.getUserName());
-            mFeedTime.setText(DateUtil.showTime(feed.getCreateTime()));
-            mFeedInfo.setText(FeedContentUtil.getFeedText(feed.getFeedInfo(), mFeedInfo));
+            feedDetailRecycleItemBinding.feedInfoLayout.feedTime.setText(DateUtil.showTime(feed.getCreateTime()));
+            feedDetailRecycleItemBinding.feedInfoLayout.feedInfo.setText(FeedContentUtil.getFeedText(feed.getFeedTitle(),
+                    feedDetailRecycleItemBinding.feedInfoLayout.feedInfo));
             // 图片
-            final List<String> photos = feed.getPhotoList();
+            final List<PhotoDto> photos = feed.getPhotos();
             if (photos != null && photos.size() > 0) {
-                mRecyclerView.setVisibility(View.VISIBLE);
-                int size = photos.size();
-                // 如果只有一张或四张图，设置两列，否则三列
-                int column = (size == 1 || size == 4) ? 2 : 3;
-                mRecyclerView.setLayoutManager(new GridLayoutManager(mRecyclerView.getContext(), column));
-                // 设置动态图片适配器
-                ContentUtil.setFeedPhotoAdapter(mRecyclerView, photos, mOnItemListener);
+                feedDetailRecycleItemBinding.feedImg.setVisibility(View.VISIBLE);
+                if (BuildConfig.DEBUG) Log.i("MoodViewHolder", "photo url is: " + photos.get(0).getUrl());
+                ContentUtil.loadImage(feedDetailRecycleItemBinding.feedImg, photos.get(0).getUrl());
             } else {
-                mRecyclerView.setVisibility(View.GONE);
+                feedDetailRecycleItemBinding.feedImg.setVisibility(View.GONE);
             }
             // 查看评论点赞数
-            mFeedSeeNum.setText(String.valueOf(feed.getViewNum()));
-            mFeedCommentNum.setText(String.valueOf(feed.getCommentNum()));
+            //mFeedSeeNum.setText(String.valueOf(feed.getViewNum()));
+            //mFeedCommentNum.setText(String.valueOf(feed.getCommentNum()));
             // 是否已经点赞
-            if (feed.isLike()) {
+            /*if (feed.isLike()) {
                 mFeedLikeIcon.setSelected(true);
             } else {
                 mFeedLikeIcon.setSelected(false);
-            }
+            }*/
             // 点赞列表
-            ContentUtil.setLikePeople(mLikePeople, mFeedLikeNum, mLikeWindow, feed.getLikeList());
+            //ContentUtil.setLikePeople(mLikePeople, mFeedLikeNum, mLikeWindow, feed.getLikeList());
         }
 
 

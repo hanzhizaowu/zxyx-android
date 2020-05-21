@@ -20,6 +20,7 @@ public class Constants {
     public static final String SP_USER_ID = "user_id";
     public static final String SP_USER_NAME = "user_name";
     public static final String SP_BEEN_LOGIN = "been_login";
+    public static final String SP_FEED_ID = "feed_id";
     public static final String SP_UPDATE_FLAG = "update_flag";
     public static final String SP_FUTURE_INFO = "sp_future_info";
 
@@ -43,4 +44,7 @@ public class Constants {
     //数据库
     public static final String DB_NAME = "zxyx.db"; // 数据库的名称
     public static final int DB_VERSION = 1; // 数据库的版本号
+
+    public static final Integer PHOTO_TYPE_IMAGE = 0;
+    public static final Integer PHOTO_TYPE_VIDEO = 1;
 }

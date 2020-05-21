@@ -19,6 +19,7 @@ import cn.zhaoxi.zxyx.adapter.FeedAdapter;
 import cn.zhaoxi.zxyx.adapter.FeedPhotoAdapter;
 import cn.zhaoxi.zxyx.common.config.Constants;
 import cn.zhaoxi.zxyx.common.glide.GlideApp;
+import cn.zhaoxi.zxyx.data.dto.PhotoDto;
 import cn.zhaoxi.zxyx.entity.Like;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
@@ -33,8 +34,7 @@ public class ContentUtil {
      * 设置用户头像，相对路径
      */
     public static void loadUserAvatar(ImageView imageView, String avatar) {
-        String url = Constants.IMG_URL + avatar;
-        loadAvatar(imageView, url);
+        loadAvatar(imageView, avatar);
     }
 
     /**
@@ -185,21 +185,15 @@ public class ContentUtil {
     /**
      * 设置动态图片适配器
      */
-    public static void setFeedPhotoAdapter(RecyclerView recyclerView, final List<String> photos, final FeedAdapter.OnItemListener mOnItemListener) {
+    public static void setFeedPhotoAdapter(RecyclerView recyclerView, final List<PhotoDto> photos, final FeedAdapter.OnItemListener mOnItemListener) {
         FeedPhotoAdapter adapter = new FeedPhotoAdapter(photos);
         adapter.setOnItemClickListener(new FeedPhotoAdapter.OnItemClickListener() {
             @Override
             public void onPhotoClick(int position) {
                 // 新对象接防止拼接后影响原来的url
-                ArrayList<String> urls = new ArrayList<>(photos);
-                int size = urls.size();
-                // 拼接url
-                for (int i = 0; i < size; i++) {
-                    String photo = urls.get(i);
-                    photo = Constants.IMG_URL + photo;
-                    urls.set(i, photo);
-                }
-                if (mOnItemListener != null) mOnItemListener.onPhotoClick(urls, position);
+                ArrayList<String> photoUrls = new ArrayList<>();
+
+                if (mOnItemListener != null) mOnItemListener.onPhotoClick(photoUrls, position);
             }
         });
         recyclerView.setAdapter(adapter);

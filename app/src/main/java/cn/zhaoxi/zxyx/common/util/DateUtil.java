@@ -14,23 +14,17 @@ public class DateUtil {
      * 显示时间，如果与当前时间差别小于一天，则自动用**秒(分，小时)前，
      * 如果大于一天则用format规定的格式显示
      *
-     * @param date 时间
+     * @param cTimeLong 时间
      * @return 处理得到的时间字符串
      */
-    public static String showTime(String date) {
+    public static String showTime(Long cTimeLong) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE);
 
-        Date cTime = null;
-        try {
-            cTime = sdf.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        Date cTime = new Date(cTimeLong);
 
         if (cTime == null) return "未知";
 
         long nowTimeLong = System.currentTimeMillis();
-        long cTimeLong = cTime.getTime();
         long result = Math.abs(nowTimeLong - cTimeLong);
 
         if (result < 60000) {
