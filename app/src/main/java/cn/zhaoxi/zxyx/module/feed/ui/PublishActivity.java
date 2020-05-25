@@ -108,11 +108,8 @@ public class PublishActivity extends BaseActivity implements Presenter {
                     showToast("好歹写点什么吧！");
                     return;
                 }
-                if (mPhotos.size() <= 1) {
-                    postSaveFeed(mPhotos);
-                } else {
-                    postUpload(mPhotos);
-                }
+
+                postUpload(mPhotos);
                 break;
         }
     }
@@ -144,19 +141,19 @@ public class PublishActivity extends BaseActivity implements Presenter {
 
         if (files != null) {
             PublishViewModel publishViewModel = ViewModelProviders.of(this).get(PublishViewModel.class);
-            publishViewModel.publishPhotos(files).observe(this, new Observer<RetrofitResponseData<List<String>>>() {
+            publishViewModel.publishPhotos(files).observe(this, new Observer<RetrofitResponseData<List<PhotoDto>>>() {
                 @Override
-                public void onChanged(RetrofitResponseData<List<String>> response) {
+                public void onChanged(RetrofitResponseData<List<PhotoDto>> response) {
                     Integer code = response.getCode();
-                    List<String> urls = response.getData();
-                    if (!ExceptionMsg.SUCCESS.getCode().equals(code) || urls == null) {
+                    List<PhotoDto> photoDtos = response.getData();
+                    if (!ExceptionMsg.SUCCESS.getCode().equals(code) || photoDtos == null) {
                         showToast(response.getMsg());
                         addPhotoAdd(mPhotos);
                         return;
                     }
 
                     // 发送动态
-                    postSaveFeed(urls);
+                    postSaveFeed(photoDtos);
                     for (File fileResult : files) {
                         fileResult.delete();
                     }
@@ -166,15 +163,9 @@ public class PublishActivity extends BaseActivity implements Presenter {
     }
 
     // 发布动态
-    private void postSaveFeed(List<String> uploadImg) {
-        removePhotoAdd(uploadImg);
-
-        List<PhotoDto> photos = new ArrayList<>();
-        for(String url : uploadImg) {
-            PhotoDto photoDto = new PhotoDto();
-            photoDto.setUrl(url);
+    private void postSaveFeed(List<PhotoDto> photos) {
+        for(PhotoDto photoDto : photos) {
             photoDto.setPhotoType(Constants.PHOTO_TYPE_IMAGE);
-            photos.add(photoDto);
         }
 
         PublishViewModel publishViewModel = ViewModelProviders.of(this).get(PublishViewModel.class);
@@ -203,8 +194,8 @@ public class PublishActivity extends BaseActivity implements Presenter {
     }
 
     // 去除添加图片按钮
-    private void removePhotoAdd(List<String> photList) {
-        photList.remove(PhotoSelAdapter.mPhotoAdd);
+    private void removePhotoAdd(List<String> photoList) {
+        photoList.remove(PhotoSelAdapter.mPhotoAdd);
     }
 
     @Override

@@ -21,7 +21,7 @@ public interface FeedApis {
      * @param requestBody     帖子文件body
      */
     @POST("/rss/upload/feed/image")
-    Observable<RetrofitResponseData<List<String>>> postPhotos(@Body RequestBody requestBody);
+    Observable<RetrofitResponseData<List<PhotoDto>>> postPhotos(@Body RequestBody requestBody);
 
     /**
      * 保存帖子

@@ -11,4 +11,6 @@ public class PhotoDto implements Serializable {
     private Long photoId;
     private String url;
     private Integer photoType;
+    private Integer photoHeight;
+    private Integer photoWidth;
 }

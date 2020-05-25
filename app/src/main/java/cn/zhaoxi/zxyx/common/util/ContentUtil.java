@@ -71,6 +71,17 @@ public class ContentUtil {
     }
 
     /**
+     * 加载瀑布流图片
+     */
+    public static void loadWaterfullImage(ImageView imageView, String url, int height, int width) {
+        GlideApp.with(imageView.getContext())
+                .load(url)
+                .override(height, width)
+                .centerInside()
+                .into(imageView);
+    }
+
+    /**
      * 加载圆形图片
      */
     public static void loadCircleCropImage(ImageView imageView, String url) {

@@ -34,7 +34,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private LoadMoreViewHolder mLoadMoreViewHolder;
 
-    private static final int TYPE_FOOTER = -1;
+    private final int TYPE_FOOTER = -1;
 
     private OnItemListener mOnItemListener;
 
@@ -147,25 +147,15 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             feedDetailRecycleItemBinding.feedInfoLayout.feedInfo.setText(FeedContentUtil.getFeedText(feed.getFeedTitle(),
                     feedDetailRecycleItemBinding.feedInfoLayout.feedInfo));
             // 图片
-            final List<PhotoDto> photos = feed.getPhotos();
-            if (photos != null && photos.size() > 0) {
-                feedDetailRecycleItemBinding.feedImg.setVisibility(View.VISIBLE);
-                if (BuildConfig.DEBUG) Log.i("MoodViewHolder", "photo url is: " + photos.get(0).getUrl());
-                ContentUtil.loadImage(feedDetailRecycleItemBinding.feedImg, photos.get(0).getUrl());
-            } else {
+            final String cover = feed.getFeedCover();
+            if(cover == null) {
                 feedDetailRecycleItemBinding.feedImg.setVisibility(View.GONE);
-            }
-            // 查看评论点赞数
-            //mFeedSeeNum.setText(String.valueOf(feed.getViewNum()));
-            //mFeedCommentNum.setText(String.valueOf(feed.getCommentNum()));
-            // 是否已经点赞
-            /*if (feed.isLike()) {
-                mFeedLikeIcon.setSelected(true);
+
             } else {
-                mFeedLikeIcon.setSelected(false);
-            }*/
-            // 点赞列表
-            //ContentUtil.setLikePeople(mLikePeople, mFeedLikeNum, mLikeWindow, feed.getLikeList());
+                feedDetailRecycleItemBinding.feedImg.setVisibility(View.VISIBLE);
+                ContentUtil.loadImage(feedDetailRecycleItemBinding.feedImg, cover);
+            }
+            //mFeedCommentNum.setText(String.valueOf(feed.getCommentNum()));;
         }
 
 

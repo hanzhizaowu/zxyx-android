@@ -68,6 +68,8 @@
     <string name="title_bar_relevant">与我相关</string>
     <string name="title_bar_conversation">会话</string>
     <string name="title_bar_public_license">开源许可</string>
+    <string name="title_recommend">推荐</string>
+    <string name="title_follow">关注</string>
 
     <!-- Dialog String -->
     <string name="dialog_loading">正在加载&#8230;</string>

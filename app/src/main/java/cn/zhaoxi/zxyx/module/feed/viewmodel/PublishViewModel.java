@@ -14,8 +14,8 @@ import cn.zhaoxi.zxyx.module.feed.repository.PublishRepository;
 public class PublishViewModel extends ViewModel {
     private PublishRepository publishRespository = PublishRepository.getInstance();
 
-    public LiveData<RetrofitResponseData<List<String>>> publishPhotos(List<File> files) {
-        LiveData<RetrofitResponseData<List<String>>> results = publishRespository.publishPhotos(files);
+    public LiveData<RetrofitResponseData<List<PhotoDto>>> publishPhotos(List<File> files) {
+        LiveData<RetrofitResponseData<List<PhotoDto>>> results = publishRespository.publishPhotos(files);
         return results;
     }
 

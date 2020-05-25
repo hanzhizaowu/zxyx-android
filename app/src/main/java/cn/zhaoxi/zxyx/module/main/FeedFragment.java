@@ -8,6 +8,10 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
+import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,35 +34,40 @@ import cn.zhaoxi.library.recycle.ItemDecoration;
 import cn.zhaoxi.library.util.ToolbarUtil;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.adapter.FeedAdapter;
+import cn.zhaoxi.zxyx.adapter.FeedWaterfullAdapter;
 import cn.zhaoxi.zxyx.common.config.Constants;
 import cn.zhaoxi.zxyx.common.config.ExceptionMsg;
 import cn.zhaoxi.zxyx.common.result.RetrofitResponseData;
+import cn.zhaoxi.zxyx.common.util.Presenter;
 import cn.zhaoxi.zxyx.common.util.SPUtil;
+import cn.zhaoxi.zxyx.common.util.SpacesItemDecoration;
 import cn.zhaoxi.zxyx.data.dto.FeedDto;
 import cn.zhaoxi.zxyx.data.dto.UserDto;
 import cn.zhaoxi.zxyx.databinding.FragmentFeedBinding;
-import cn.zhaoxi.zxyx.entity.Feed;
 import cn.zhaoxi.zxyx.module.feed.ui.PublishActivity;
 import cn.zhaoxi.zxyx.module.feed.viewmodel.FeedViewModel;
 
 /**
  * 圈子动态
  */
-public class FeedFragment extends BaseFragment {
+public class FeedFragment extends BaseFragment implements Presenter {
 
-    private static final String FEED_TYPE = "feed_type";
-
-    private RecyclerView mRecyclerView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
     private FragmentFeedBinding fragmentFeedBinding;
 
     private List<FeedDto> mList = new ArrayList<>();
-    private FeedAdapter mAdapter;
+    private FeedAdapter feedAdapter;
+    private FeedWaterfullAdapter feedWaterfullAdapter;
+    private RecyclerView.Adapter<RecyclerView.ViewHolder> mAdapter;
 
-    private int mCount = 10;
+    private final int PAGE_COUNT = 10;
     private final int MOD_REFRESH = 1;
     private final int MOD_LOADING = 2;
     private int RefreshMODE = 0;
+
+    private LinearLayoutManager linearLayoutManager;
+    private StaggeredGridLayoutManager staggeredGridLayoutmanager;
+    private ItemDecoration itemLinearDecoration;
+    private SpacesItemDecoration itemWaterfullDecoration;
 
     public FeedFragment() {
 
@@ -71,11 +81,24 @@ public class FeedFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentFeedBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_feed, container,false);
+        fragmentFeedBinding.setPresenter(this);
         View view = fragmentFeedBinding.getRoot();
-        mRecyclerView = fragmentFeedBinding.recyclerView;
-        mSwipeRefreshLayout = fragmentFeedBinding.swipeRefreshLayout;
         init();
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        fragmentFeedBinding = null;
+        mList = null;
+        mAdapter = null;
+        feedAdapter = null;
+        feedWaterfullAdapter = null;
+        linearLayoutManager = null;
+        staggeredGridLayoutmanager = null;
+        itemWaterfullDecoration = null;
+        itemLinearDecoration = null;
     }
 
     private void init() {
@@ -95,78 +118,66 @@ public class FeedFragment extends BaseFragment {
                 })
                 .build();
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        mRecyclerView.setLayoutManager(layoutManager);
+        fragmentFeedBinding.pageFollow.setTextColor(getResources().getColor(R.color.red));
 
-        mRecyclerView.setItemAnimator(new ItemAnimator());
-        ItemDecoration itemDecoration = new ItemDecoration(LinearLayoutCompat.VERTICAL, 10, Color.parseColor("#f2f2f2"));
-        // 隐藏最后一个item的分割线
-        itemDecoration.setGoneLast(true);
-        mRecyclerView.addItemDecoration(itemDecoration);
-
-        mAdapter = new FeedAdapter(mList);
-        mRecyclerView.setAdapter(mAdapter);
-
+        initValue();
+        getRecycleLinear();
         initEvent();
-        getMoodList(mCount);
+        getMoodList(PAGE_COUNT, 0L, true);
+    }
+
+    private void initValue() {
+        itemWaterfullDecoration = new SpacesItemDecoration(8);
+
+        itemLinearDecoration = new ItemDecoration(LinearLayoutCompat.VERTICAL, 10, Color.parseColor("#f2f2f2"));
+        // 隐藏最后一个item的分割线
+        itemLinearDecoration.setGoneLast(true);
     }
 
     //初始化事件
     private void initEvent() {
         //刷新
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        fragmentFeedBinding.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 RefreshMODE = MOD_REFRESH;
-                getMoodList(mCount);
-            }
-        });
-
-        //item点击
-        mAdapter.setOnItemListener(new FeedAdapter.OnItemListener() {
-            @Override
-            public void onItemClick(View view, FeedDto feed, int position) {
-                switch (view.getId()) {
-                    case R.id.user_img:
-                        goToUser(feed.getPostUser());
-                        break;
-                    case R.id.feed_card:
-                    //case R.id.feed_comment_layout:
-                        gotoMood(feed);
-                        break;
-                    /*case R.id.feed_like_layout:
-                        if (feed.isLike()) return;
-                        // 未点赞点赞
-                        postAddLike(feed, position);
-                        break;*/
-                }
-            }
-
-            @Override
-            public void onPhotoClick(ArrayList<String> photos, int position) {
-                PhotoBrowser.builder()
-                        .setPhotos(photos)
-                        .setCurrentItem(position)
-                        .start(Objects.requireNonNull(getActivity()));
+                boolean getLinear = (mAdapter instanceof FeedAdapter) ? true : false;
+                getMoodList(PAGE_COUNT, 0L, getLinear);
             }
         });
 
         //滑动监听
-        mRecyclerView.addOnScrollListener(new OnLoadMoreListener() {
+        fragmentFeedBinding.recyclerView.addOnScrollListener(new OnLoadMoreListener() {
 
             @Override
             public void onLoadMore() {
-                if (mAdapter.getItemCount() < mCount) return;
+                if (mAdapter.getItemCount() < PAGE_COUNT) return;
 
                 RefreshMODE = MOD_LOADING;
-                mAdapter.updateLoadStatus(LoadMord.LOAD_MORE);
+                if(mAdapter instanceof FeedAdapter) {
+                    feedAdapter.updateLoadStatus(LoadMord.LOAD_MORE);
+                }
 
-                mRecyclerView.postDelayed(new Runnable() {
+                fragmentFeedBinding.recyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        getMoodList(mCount);
+                        Long feedId = SPUtil.build().getLong(Constants.SP_FEED_ID);
+                        if (feedId < 0) {
+                            feedId = 0L;
+                        }
+
+                        boolean getLinear = (mAdapter instanceof FeedAdapter) ? true : false;
+                        getMoodList(PAGE_COUNT, feedId, getLinear);
                     }
                 },1000);
+            }
+        });
+
+        fragmentFeedBinding.recyclerView.addOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                staggeredGridLayoutmanager.invalidateSpanAssignments();//防止第一行到顶部有空白
             }
         });
     }
@@ -186,70 +197,38 @@ public class FeedFragment extends BaseFragment {
         startActivityForResult(intent, Constants.ACTIVITY_MOOD);*/
     }
 
-    // 点赞
-    private void postAddLike(final Feed feed, final int position) {
-        /*OkUtil.post()
-                .url(Api.saveAction)
-                .addParam("feedId", feed.getId())
-                .addParam("userId", saveUid)
-                .addParam("type", "0")
-                .execute(new ResultCallback<Result>() {
-                    @Override
-                    public void onSuccess(Result response) {
-                        String code = response.getCode();
-                        if (!"00000".equals(code)) {
-                            showToast("点赞失败");
-                            return;
-                        }
-                        List<Like> likeList = new ArrayList<>(feed.getLikeList());
-                        Like like = new Like();
-                        like.setUserId(saveUid);
-                        like.setUsername(saveUName);
-                        likeList.add(like);
-                        feed.setLikeList(likeList);
-                        feed.setLike(true);
-                        mAdapter.updateItem(feed, position);
-                    }
-
-                    @Override
-                    public void onError(Call call, Exception e) {
-                        showToast("点赞失败");
-                    }
-                });*/
-    }
-
     // 获取动态列表
-    private void getMoodList(int pageSize) {
-        if (!mSwipeRefreshLayout.isRefreshing() && RefreshMODE == MOD_REFRESH) mSwipeRefreshLayout.setRefreshing(true);
+    private void getMoodList(int pageSize, Long feedId, boolean getLinear) {
+        if (!fragmentFeedBinding.swipeRefreshLayout.isRefreshing()
+                && RefreshMODE == MOD_REFRESH) fragmentFeedBinding.swipeRefreshLayout.setRefreshing(true);
         Long uid = SPUtil.build().getLong(Constants.SP_USER_ID);
-        Long feedId = SPUtil.build().getLong(Constants.SP_FEED_ID);
-        if (feedId < 0) {
-            feedId = 0L;
-        }
 
         FeedViewModel feedViewModel = ViewModelProviders.of(this).get(FeedViewModel.class);
         feedViewModel.getFeedPage(uid, feedId).observe(this, new Observer<RetrofitResponseData<List<FeedDto>>>() {
             @Override
             public void onChanged(RetrofitResponseData<List<FeedDto>> response) {
-                mSwipeRefreshLayout.setRefreshing(false);
+                fragmentFeedBinding.swipeRefreshLayout.setRefreshing(false);
                 Integer code = response.getCode();
                 if (!ExceptionMsg.SUCCESS.getCode().equals(code)) {
-                    mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
+                    if(getLinear) {
+                        feedAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
+                    }
+
                     showToast(R.string.toast_get_feed_error);
                     return;
                 }
 
                 List<FeedDto> pageFeed = response.getData();
-                if ((pageFeed == null) || (pageFeed.size() == 0)) {
-                    mAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
+                if (((pageFeed == null) || (pageFeed.size() == 0)) && getLinear) {
+                    feedAdapter.updateLoadStatus(LoadMord.LOAD_NONE);
                     return;
                 }
                 switch (RefreshMODE) {
                     case MOD_LOADING:
-                        updateData(pageFeed);
+                        updateData(pageFeed, getLinear);
                         break;
                     default:
-                        setData(pageFeed);
+                        setData(pageFeed, getLinear);
                         break;
                 }
             }
@@ -257,19 +236,28 @@ public class FeedFragment extends BaseFragment {
     }
 
     // 设置数据
-    private void setData(List<FeedDto> data){
-        mAdapter.setData(data);
+    private void setData(List<FeedDto> data, boolean getLinear){
+        if(getLinear) {
+            feedAdapter.setData(data);
+        } else {
+            feedWaterfullAdapter.setData(data);
+        }
     }
 
     // 更新数据
-    public void updateData(List<FeedDto> data) {
-        mAdapter.addData(data);
+    public void updateData(List<FeedDto> data, boolean getLinear) {
+        if(getLinear) {
+            feedAdapter.addData(data);
+        } else {
+            feedWaterfullAdapter.addData(data);
+        }
     }
 
     // 刷新数据
     private void onRefresh(){
         RefreshMODE = MOD_REFRESH;
-        getMoodList(mCount);
+        boolean getLinear = (mAdapter instanceof FeedAdapter) ? true : false;
+        getMoodList(PAGE_COUNT, 0L, getLinear);
     }
 
     @Override
@@ -290,5 +278,105 @@ public class FeedFragment extends BaseFragment {
         bundle.putSerializable(Constants.PASSED_USER_INFO, user);
         intent.putExtras(bundle);
         startActivity(intent);*/
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.page_follow:
+                fragmentFeedBinding.pageFollow.setTextColor(getResources().getColor(R.color.red));
+                fragmentFeedBinding.pageRecommend.setTextColor(getResources().getColor(R.color.black));
+                getRecycleLinear();
+                getMoodList(PAGE_COUNT, 0L, true);
+                break;
+            case R.id.page_recommend:
+                fragmentFeedBinding.pageFollow.setTextColor(getResources().getColor(R.color.black));
+                fragmentFeedBinding.pageRecommend.setTextColor(getResources().getColor(R.color.red));
+                getRecyclerStaggered();
+                getMoodList(PAGE_COUNT, 0L, false);
+                break;
+        }
+    }
+
+    // 初始化瀑布流布局的循环视图
+    private void getRecyclerStaggered() {
+        // 创建一个垂直方向的瀑布流布局管理器
+        if(staggeredGridLayoutmanager == null) {
+            staggeredGridLayoutmanager = new StaggeredGridLayoutManager(
+                    2, RecyclerView.VERTICAL);
+            //防止item交换位置
+            staggeredGridLayoutmanager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
+            fragmentFeedBinding.recyclerView.setItemAnimator(new ItemAnimator());
+        }
+
+        fragmentFeedBinding.recyclerView.setPadding(8,8,8,8);
+        //以下三行去掉 RecyclerView 动画代码，防止闪烁
+        //((DefaultItemAnimator) fragmentFeedBinding.recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        //((SimpleItemAnimator) fragmentFeedBinding.recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        //fragmentFeedBinding.recyclerView.getItemAnimator().setChangeDuration(0);
+
+        fragmentFeedBinding.recyclerView.addItemDecoration(itemWaterfullDecoration);
+        // 设置循环视图的布局管理器
+        fragmentFeedBinding.recyclerView.setLayoutManager(staggeredGridLayoutmanager);
+        if(feedWaterfullAdapter == null) {
+            // 构建一个服装列表的瀑布流适配器
+            feedWaterfullAdapter = new FeedWaterfullAdapter(mList);
+            // 设置瀑布流列表的点击监听器
+            feedWaterfullAdapter.setOnItemListener(new FeedWaterfullAdapter.OnItemListener() {
+
+                @Override
+                public void onItemClick(View view, FeedDto feed, int position) {
+                    switch (view.getId()) {
+                        case R.id.iv_feed_waterfull_item:
+                            gotoMood(feed);
+                            break;
+                    }
+                }
+            });
+        }
+
+        // 给rv_staggered设置服装瀑布流适配器er
+        fragmentFeedBinding.recyclerView.setAdapter(feedWaterfullAdapter);
+        mAdapter = feedWaterfullAdapter;
+    }
+
+    private void getRecycleLinear() {
+        if(linearLayoutManager == null) {
+            linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+            fragmentFeedBinding.recyclerView.setItemAnimator(new ItemAnimator());
+        }
+
+        fragmentFeedBinding.recyclerView.setPadding(0,0,0,0);
+        fragmentFeedBinding.recyclerView.addItemDecoration(itemLinearDecoration);
+        fragmentFeedBinding.recyclerView.setLayoutManager(linearLayoutManager);
+
+        if(feedAdapter == null) {
+            feedAdapter = new FeedAdapter(mList);
+            //item点击
+            feedAdapter.setOnItemListener(new FeedAdapter.OnItemListener() {
+                @Override
+                public void onItemClick(View view, FeedDto feed, int position) {
+                    switch (view.getId()) {
+                        case R.id.user_img:
+                            goToUser(feed.getPostUser());
+                            break;
+                        case R.id.feed_card:
+                            //case R.id.feed_comment_layout:
+                            gotoMood(feed);
+                            break;
+                    }
+                }
+
+                @Override
+                public void onPhotoClick(ArrayList<String> photos, int position) {
+                    PhotoBrowser.builder()
+                            .setPhotos(photos)
+                            .setCurrentItem(position)
+                            .start(Objects.requireNonNull(getActivity()));
+                }
+            });
+        }
+        fragmentFeedBinding.recyclerView.setAdapter(feedAdapter);
+        mAdapter = feedAdapter;
     }
 }

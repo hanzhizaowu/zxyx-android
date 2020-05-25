@@ -39,29 +39,29 @@ public class PublishRepository {
         return instance;
     }
 
-    public LiveData<RetrofitResponseData<List<String>>> publishPhotos(List<File> files) {
-        MutableLiveData<RetrofitResponseData<List<String>>> uploadResult = new MutableLiveData<>();
+    public LiveData<RetrofitResponseData<List<PhotoDto>>> publishPhotos(List<File> files) {
+        MutableLiveData<RetrofitResponseData<List<PhotoDto>>> uploadResult = new MutableLiveData<>();
         FeedApis feedApis = ApiClient.getRetrofit().create(FeedApis.class);
         //对 发送请求 进行封装
         RequestBody requestBody = getMultipartBody(files);
-        Observable<RetrofitResponseData<List<String>>> observable = feedApis.postPhotos(requestBody);
+        Observable<RetrofitResponseData<List<PhotoDto>>> observable = feedApis.postPhotos(requestBody);
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<RetrofitResponseData<List<String>>>() {
+                .subscribe(new Observer<RetrofitResponseData<List<PhotoDto>>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(RetrofitResponseData<List<String>> retrofitResponse) {
+                    public void onNext(RetrofitResponseData<List<PhotoDto>> retrofitResponse) {
                         uploadResult.setValue(retrofitResponse);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        RetrofitResponseData<List<String>> retrofitResponse = new RetrofitResponseData<>();
+                        RetrofitResponseData<List<PhotoDto>> retrofitResponse = new RetrofitResponseData<>();
                         retrofitResponse.setCode(ExceptionMsg.FAILED.getCode());
                         uploadResult.setValue(retrofitResponse);
                     }
@@ -81,6 +81,7 @@ public class PublishRepository {
         feedDto.setPhotos(photos);
         feedDto.setFeedTitle(feedTitle);
         feedDto.setFeedDescription(feedDescription);
+        feedDto.setFeedCover(photos.get(0).getUrl());
         UserDto userDto = new UserDto();
         userDto.setUserId(postUserId);
         feedDto.setPostUser(userDto);

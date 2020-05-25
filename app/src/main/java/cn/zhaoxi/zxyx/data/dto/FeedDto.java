@@ -16,4 +16,7 @@ public class FeedDto implements Serializable {
     private Long createTime;
     private Long updateTime;
     private Integer feedType;
+    private String feedCover;
+    private Integer coverHeight;
+    private Integer coverWidth;
 }
