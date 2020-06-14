@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!--左边布局-->
+        <RelativeLayout
+            android:id="@+id/rl_left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left|center_vertical">
+
+            <cn.zhaoxi.library.view.CircleImageView
+                android:id="@+id/cv_left"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/img_user"/>
+
+            <TextView
+                android:id="@+id/tv_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/spacing_3"
+                android:layout_toRightOf="@id/cv_left"
+                android:textSize="18dp"
+                android:layout_centerVertical="true"
+                android:text="@string/app_name"
+                android:maxWidth="180dp" />
+
+        </RelativeLayout>
+
+        <!--右边布局-->
+        <RelativeLayout
+            android:id="@+id/rl_rigth"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right|center_vertical"
+            >
+            <cn.zhaoxi.library.view.CircleImageView
+                android:id="@+id/cv_right"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/img_user"/>
+
+            <TextView
+                android:id="@+id/tv_rigth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="180dp"
+                android:textSize="18dp"
+                android:text="@string/app_name"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/cv_right"
+                android:layout_marginRight="@dimen/spacing_3" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+</layout>

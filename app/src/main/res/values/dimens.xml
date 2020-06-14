@@ -5,6 +5,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <!-- spacing size -->
+    <dimen name="spacing_1">1dp</dimen>
+    <dimen name="spacing_2">2dp</dimen>
     <dimen name="spacing_3">3dp</dimen>
     <dimen name="spacing_4">4dp</dimen>
     <dimen name="spacing_6">6dp</dimen>

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:background="@color/white"
         android:orientation="vertical"
-        tools:context=".module.main.FeedFragment">
+        tools:context=".module.main.ui.FeedFragment">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/feed_toolbar"

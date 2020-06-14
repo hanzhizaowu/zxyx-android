@@ -67,9 +67,9 @@ public class ImageUtil {
     }
 
     /**
-     * 路径转图片文件
+     * 路径转文件
      */
-    public static List<File> pathToImageFile(List<String> filePaths) {
+    public static List<File> pathToFile(List<String> filePaths) {
         List<File> files = new ArrayList<>();
         if (filePaths == null || filePaths.size() == 0) return files;
 

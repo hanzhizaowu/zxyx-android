@@ -1,10 +1,13 @@
 package cn.zhaoxi.zxyx.module;
 
 import android.app.Application;
+import android.content.Context;
+import android.util.Log;
 
 import cn.zhaoxi.zxyx.common.util.SPUtil;
 import cn.zhaoxi.zxyx.common.database.DBHelper;
 import cn.zhaoxi.zxyx.module.user.repository.UserDataSource;
+import nl.bravobit.ffmpeg.FFmpeg;
 
 public class ZxyxApplication extends Application {
     private static DBHelper dbHelper;
@@ -18,8 +21,15 @@ public class ZxyxApplication extends Application {
         SPUtil.newInstance().init(this);
         dbHelper = DBHelper.getInstance(this, 0);
         userDataSource = new UserDataSource(this);
+        initFFmpegBinary(this);
         // 根据需求使用
         //initOkUtil();
+    }
+
+    private void initFFmpegBinary(Context context) {
+        if (!FFmpeg.getInstance(context).isSupported()) {
+            Log.e("ZApplication","Android cup arch not supported!");
+        }
     }
 
     public static DBHelper getDbHelperInstance() {

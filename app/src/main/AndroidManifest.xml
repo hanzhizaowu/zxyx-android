@@ -15,7 +15,7 @@
 
     <application
         android:name=".module.ZxyxApplication"
-        android:allowBackup="false"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${APP_NAME}"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -45,10 +45,23 @@
             android:name=".module.user.ui.ResetPwdActivity"
             android:launchMode="singleTop" />
         <activity
-            android:name=".module.main.MainActivity"
+            android:name=".module.main.ui.MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
         <activity android:name=".module.user.ui.PersonalInfoActivity"></activity>
-        <activity android:name=".module.feed.ui.PublishActivity"></activity>
+        <activity android:name=".module.publish.ui.PublishActivity"
+            android:launchMode="singleInstance"></activity>
+        <activity android:name=".module.message.ui.ChatActivity"></activity>
+
+        <!-- Video start -->
+        <activity
+            android:name=".module.video.ui.VideoSelectActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".module.video.ui.VideoTrimmerActivity"
+            android:screenOrientation="portrait"/>
+        <!-- Video end -->
 
         <!-- PhotoPicker start -->
         <activity

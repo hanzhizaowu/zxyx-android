@@ -19,4 +19,5 @@ public class FeedDto implements Serializable {
     private String feedCover;
     private Integer coverHeight;
     private Integer coverWidth;
+    private VideoDto video;
 }

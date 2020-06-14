@@ -171,7 +171,7 @@ public class RelevantActivity extends BaseActivity {
     private void gotoFeed(Feed feed) {
         /*Intent intent = new Intent(RelevantActivity.this, FeedActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("feed", feed);
+        bundle.putSerializable("publish", publish);
         intent.putExtras(bundle);
         startActivity(intent);*/
     }

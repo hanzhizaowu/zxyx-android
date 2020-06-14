@@ -5,6 +5,7 @@ import java.util.List;
 import cn.zhaoxi.zxyx.common.result.RetrofitResponseData;
 import cn.zhaoxi.zxyx.data.dto.FeedDto;
 import cn.zhaoxi.zxyx.data.dto.PhotoDto;
+import cn.zhaoxi.zxyx.data.dto.VideoDto;
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
 import retrofit2.http.Body;
@@ -24,6 +25,13 @@ public interface FeedApis {
     Observable<RetrofitResponseData<List<PhotoDto>>> postPhotos(@Body RequestBody requestBody);
 
     /**
+     * 帖子视频上传
+     * @param requestBody     帖子文件body
+     */
+    @POST("/rss/upload/feed/video")
+    Observable<RetrofitResponseData<VideoDto>> postVideo(@Body RequestBody requestBody);
+
+    /**
      * 保存帖子
      * @param requestBody     帖子vo参数
      */
@@ -36,5 +44,6 @@ public interface FeedApis {
      * @param photoId    当前展示的帖子id，服务端返回大于该id的帖子。如果当前没有帖子，则帖子id为0
      */
     @POST("/feed/page")
-    Observable<RetrofitResponseData<List<FeedDto>>> getFeedPage(@Query("userId") Long userId, @Query("photoId") Long photoId, @Query("pageSize") Integer pageSize);
+    Observable<RetrofitResponseData<List<FeedDto>>> getFeedPage(@Query("userId") Long userId, @Query("photoId") Long photoId,
+                                                                @Query("pageSize") Integer pageSize, @Query("feedType") Integer feedType);
 }

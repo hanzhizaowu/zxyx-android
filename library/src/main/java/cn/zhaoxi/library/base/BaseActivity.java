@@ -16,14 +16,36 @@ import cn.zhaoxi.library.util.ToastUtil;
 import cn.zhaoxi.library.view.LoadingDialog;
 import cn.zhaoxi.library.view.MoeToast;
 
+/**
+ * time   : 2019/02/22
+ * version: 1.0
+ * description:模板方法模式
+ * 定义算法骨架，将一些步骤延时到子类，可定义钩子函数。
+ */
 public class BaseActivity extends AppCompatActivity {
 
     public static final String TAG = "lcDev";
+
+    protected void initUI() {
+
+    }
+    protected void loadData() {
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setSystemUiLightStatus();
+        try {
+            render();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void render() {
+        initUI();
+        loadData();
     }
 
     // 加载动画开始

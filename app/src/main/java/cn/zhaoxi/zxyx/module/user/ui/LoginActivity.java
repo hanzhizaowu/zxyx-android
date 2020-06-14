@@ -17,7 +17,7 @@ import cn.zhaoxi.zxyx.common.config.ExceptionMsg;
 import cn.zhaoxi.zxyx.common.config.Constants;
 import cn.zhaoxi.zxyx.common.util.SPUtil;
 import cn.zhaoxi.zxyx.databinding.ActivityLoginBinding;
-import cn.zhaoxi.zxyx.module.main.MainActivity;
+import cn.zhaoxi.zxyx.module.main.ui.MainActivity;
 import cn.zhaoxi.zxyx.module.user.viewmodel.LoginViewModel;
 
 /**

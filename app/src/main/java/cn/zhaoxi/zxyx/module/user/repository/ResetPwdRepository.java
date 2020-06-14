@@ -3,6 +3,7 @@ package cn.zhaoxi.zxyx.module.user.repository;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import cn.zhaoxi.library.util.crypt.Crypt;
 import cn.zhaoxi.zxyx.common.api.UserApis;
 import cn.zhaoxi.zxyx.common.config.ApiClient;
 import cn.zhaoxi.zxyx.common.result.RetrofitResponse;
@@ -27,7 +28,8 @@ public class ResetPwdRepository {
 
         UserApis userApis = ApiClient.getRetrofit().create(UserApis.class);
         //对 发送请求 进行封装
-        Observable<RetrofitResponse> observable = userApis.postUserResetPassword(userName, userMobile, userPassword);
+        String userEncodePwd = Crypt.Encrypt(userPassword);
+        Observable<RetrofitResponse> observable = userApis.postUserResetPassword(userName, userMobile, userEncodePwd);
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<RetrofitResponse>() {

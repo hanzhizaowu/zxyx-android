@@ -1,5 +1,6 @@
 package cn.zhaoxi.zxyx.adapter;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -12,6 +13,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.zhaoxi.library.BuildConfig;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.common.util.ContentUtil;
 
@@ -56,6 +58,15 @@ public class PhotoSelAdapter extends RecyclerView.Adapter<PhotoSelAdapter.PhotoV
     public void setPhotos(List<String> photos) {
         this.mPhotos = photos;
         if (mPhotos.size() < 6 && !mPhotos.contains(mPhotoAdd)) mPhotos.add(mPhotoAdd);
+        notifyDataSetChanged();
+    }
+
+    public void setVideoPhoto(List<String> photos) {
+        this.mPhotos = photos;
+        if (mPhotos.contains(mPhotoAdd)) {
+            mPhotos.remove(mPhotoAdd);
+        }
+
         notifyDataSetChanged();
     }
 

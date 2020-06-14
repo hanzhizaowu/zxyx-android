@@ -16,7 +16,7 @@ import cn.zhaoxi.library.view.LoadingDialog;
 import cn.zhaoxi.zxyx.R;
 import cn.zhaoxi.zxyx.common.config.ExceptionMsg;
 import cn.zhaoxi.zxyx.databinding.ActivityRegisterBinding;
-import cn.zhaoxi.zxyx.module.main.MainActivity;
+import cn.zhaoxi.zxyx.module.main.ui.MainActivity;
 import cn.zhaoxi.zxyx.module.user.viewmodel.RegisterViewModel;
 
 /**

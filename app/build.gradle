@@ -70,6 +70,7 @@ ext {
     lifecycleVersion = "1.1.1"
     roomVersion = "1.1.1"
     daggerVersion = "2.16"
+    androidFfmpegVersion = "1.1.7"
 }
 
 dependencies {
@@ -114,6 +115,25 @@ dependencies {
     //butterknife
     implementation "com.jakewharton:butterknife:${butterknifeVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+    //android ffmpeg
+    implementation "nl.bravobit:android-ffmpeg:${androidFfmpegVersion}"
+    //rxpermission
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
+    //mediaplayer
+    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
+    implementation 'org.slf4j:slf4j-android:1.7.21'
+    //mqtt
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
+    implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+    //event bus
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    //RecyclerViewHeader
+    implementation 'com.bartoszlipinski:recyclerviewheader2:2.0.1'
 
     implementation project(':library')
 }

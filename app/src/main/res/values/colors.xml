@@ -26,4 +26,10 @@
     <color name="grapefruit">#ED5565</color>
     <color name="tnt">#fffcf7</color>
     <color name="mine_select_black">#ffeeeeee</color>
+
+    <color name="shadow_color">#7F000000</color>
+    <color name="dialog_bg">#bc000000</color>
+    <color name="color_shape_right">#5CBAF7</color>
+    <color name="oriange">#ff9a00</color>
+    <color name="colorText">#66000000</color>
 </resources>

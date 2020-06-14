@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+    </data>
+    <LinearLayout
+        android:id="@+id/video_action_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_52"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/user_img"
+                android:layout_width="@dimen/spacing_32"
+                android:layout_height="@dimen/spacing_32"
+                android:layout_marginTop="@dimen/spacing_3"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="@dimen/spacing_6"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_user" />
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_3"
+                android:layout_toRightOf="@id/user_img"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="6dp" />
+
+            <TextView
+                android:id="@+id/feed_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/user_name"
+                android:layout_marginTop="3dp"
+                android:layout_toRightOf="@id/user_img" />
+        </RelativeLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/feed_video_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="3dp"
+            android:lineSpacingMultiplier="1.2"
+            android:padding="2dp"
+            android:text="@string/app_name"
+            android:textSize="16dp" />
+
+    </LinearLayout>
+</layout>

@@ -32,7 +32,7 @@ import cn.zhaoxi.zxyx.common.util.SPUtil;
 
 import cn.zhaoxi.zxyx.data.dto.UserDto;
 import cn.zhaoxi.zxyx.databinding.ActivityPersonalInfoBinding;
-import cn.zhaoxi.zxyx.dialog.EditTextDialog;
+import cn.zhaoxi.zxyx.view.dialog.EditTextDialog;
 import cn.zhaoxi.zxyx.module.user.viewmodel.MineViewModel;
 import me.iwf.photopicker.PhotoPicker;
 import me.iwf.photopicker.PhotoPreview;

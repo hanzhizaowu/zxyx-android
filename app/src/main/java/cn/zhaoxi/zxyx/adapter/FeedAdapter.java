@@ -95,7 +95,8 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void updateLoadStatus(int status) {
-        mLoadMoreViewHolder.bindItem(status);
+        if(mLoadMoreViewHolder != null)
+            mLoadMoreViewHolder.bindItem(status);
     }
 
     // 设置数据
@@ -104,7 +105,10 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return;
         }
         mList = data;
-        mLoadMoreViewHolder.bindItem(LoadMord.LOAD_PULL_TO);
+        if(mLoadMoreViewHolder != null) {
+            mLoadMoreViewHolder.bindItem(LoadMord.LOAD_PULL_TO);
+        }
+
         notifyDataSetChanged();
     }
 
@@ -114,7 +118,10 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return;
         }
         mList.addAll(data);
-        mLoadMoreViewHolder.bindItem(LoadMord.LOAD_PULL_TO);
+        if(mLoadMoreViewHolder != null) {
+            mLoadMoreViewHolder.bindItem(LoadMord.LOAD_PULL_TO);
+        }
+
         notifyDataSetChanged();
     }
 
@@ -155,7 +162,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 feedDetailRecycleItemBinding.feedImg.setVisibility(View.VISIBLE);
                 ContentUtil.loadImage(feedDetailRecycleItemBinding.feedImg, cover);
             }
-            //mFeedCommentNum.setText(String.valueOf(feed.getCommentNum()));;
+            //mFeedCommentNum.setText(String.valueOf(publish.getCommentNum()));;
         }
 
 
